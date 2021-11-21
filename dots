@@ -1,0 +1,50 @@
+#!/bin/bash
+
+dots_dir=$(cat $HOME/.dotsconfig)
+files=$(ls -a $dots_dir | grep -Ev '^\.$|^\.\.$|^.git*|^README.md$|^other$')
+
+usage () {
+    echo "usage: dots [set <path>] [link] [status]"
+}
+
+status () {
+    for file in $files; do
+        if [ -h $HOME/.config/$file ] || [ -h $HOME/$file ]; then
+            echo -e "$(tput bold)\e[36m$file\e[0m@"
+        else
+            echo $file
+        fi
+    done
+}
+
+case $1 in
+    link)
+         if [ ! $2 ]; then
+             for file in $files; do
+                 if [ -d $dots_dir/$file ]; then
+                     ln -s $dots_dir/$file $HOME/.config/
+                     echo "linked $HOME/.config/$file"
+                 elif [[ $file = .* ]]; then
+                     ln -s $dots_dir/$file $HOME/
+                     echo "linked $HOME/$file"
+                 fi
+             done
+         fi
+    ;;
+
+    set)
+        if [ $2 ]; then
+            echo $2 > $HOME/.dotsconfig
+        else
+            echo "missing argument"
+        fi
+    ;;
+
+    status)
+        status
+    ;;
+
+    *)
+        usage
+    ;;
+esac

@@ -1,2 +1,2 @@
-# dots
-Dotfile manager made with Shell
+# dots (WIP)
+Dotfile manager made in Shell.
