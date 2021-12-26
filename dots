@@ -21,7 +21,7 @@ case $1 in
     link)
          if [ ! $2 ]; then
              for file in $files; do
-                 if [ -d $dots_dir/$file ]; then
+                 if [ -d $dots_dir/$file ] && [[ ! $file = .* ]]; then
                      ln -s $dots_dir/$file $HOME/.config/
                      echo "linked $HOME/.config/$file"
                  elif [[ $file = .* ]]; then
