@@ -1,5 +1,8 @@
 #!/bin/bash
 
+if [ ! -f $HOME/.dotsconfig ]; then
+    touch $HOME/.dotsconfig
+fi
 dots_dir=$(cat $HOME/.dotsconfig)
 files=$(ls -a $dots_dir | grep -Ev '^\.$|^\.\.$|^.git*|^README.md$|^other$')
 
@@ -24,27 +27,61 @@ status () {
     done
 }
 
+# link a dotfile
+link () {
+    if [ -d $dots_dir/$1 ] && [[ ! $1 = .* ]]; then
+        ln -s $dots_dir/$1 $HOME/.config/ && echo "linked $HOME/.config/$1"
+    elif [[ $1 = .* ]]; then
+        ln -s $dots_dir/$1 $HOME/ && echo "linked $HOME/$1"
+    fi
+}
+
+# unlink a dotfile
+rmlink () {
+    if [ -d $dots_dir/$1 ] && [[ ! $1 = .* ]]; then
+        unlink $HOME/.config/$1 && echo "unlinked $HOME/.config/$1"
+    elif [[ $1 = .* ]]; then
+        unlink $HOME/$1 && echo "unlinked $HOME/$1"
+    fi
+}
+
 # contains all possible commands
 case $1 in
-    link)
+    link | l)
         if [ ! $2 ]; then
+            no_changes=0
             for file in $files; do
                 if ! linked $file; then
-                    if [ -d $dots_dir/$file ] && [[ ! $file = .* ]]; then
-                        ln -s $dots_dir/$file $HOME/.config/ && echo "linked $HOME/.config/$file"
-                    elif [[ $file = .* ]]; then
-                        ln -s $dots_dir/$file $HOME/ && echo "linked $HOME/$file"
-                    fi
+                    link $file
                 fi
+                no_changes=1
             done
-            echo "done!"
-        else
-            file="$2"
-            if [ -d $dots_dir/$file ] && [[ ! $file = .* ]]; then
-                ln -s $dots_dir/$file $HOME/.config/ && echo "linked $HOME/.config/$file"
-            elif [[ $file = .* ]]; then
-                ln -s $dots_dir/$file $HOME/ && echo "linked $HOME/$file"
+            if [ $no_changes ]; then
+                echo "already linked"
+            else
+                echo "done!"
             fi
+        else
+            link $2
+        fi
+    ;;
+
+    unlink | ul)
+        if [ ! $2 ]; then
+            no_changes=0
+            for file in $files; do
+                if linked $file; then
+                    rmlink $file
+                fi
+                no_changes=1
+            done
+            if [ $no_changes ]; then
+                echo "already unlinked"
+            else
+                echo "done!"
+            fi
+        else
+            rmlink $2
         fi
     ;;
 
@@ -56,7 +93,7 @@ case $1 in
         fi
     ;;
 
-    status)
+    status | list | ls)
         status
     ;;
 
