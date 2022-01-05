@@ -30,9 +30,9 @@ status () {
 # link a dotfile
 link () {
     if [ -d $dots_dir/$1 ] && [[ ! $1 = .* ]]; then
-        ln -s $dots_dir/$1 $HOME/.config/ && echo "linked $HOME/.config/$1"
+        ln -s $dots_dir/$1 $HOME/.config/ && echo "created link at $HOME/.config/$1"
     elif [[ $1 = .* ]]; then
-        ln -s $dots_dir/$1 $HOME/ && echo "linked $HOME/$1"
+        ln -s $dots_dir/$1 $HOME/ && echo "created link at $HOME/$1"
     fi
 }
 
@@ -49,18 +49,12 @@ rmlink () {
 case $1 in
     link | l)
         if [ ! $2 ]; then
-            no_changes=0
             for file in $files; do
                 if ! linked $file; then
                     link $file
                 fi
-                no_changes=1
             done
-            if [ $no_changes ]; then
-                echo "already linked"
-            else
-                echo "done!"
-            fi
+            echo "done!"
         else
             link $2
         fi
@@ -68,18 +62,12 @@ case $1 in
 
     unlink | ul)
         if [ ! $2 ]; then
-            no_changes=0
             for file in $files; do
                 if linked $file; then
                     rmlink $file
                 fi
-                no_changes=1
             done
-            if [ $no_changes ]; then
-                echo "already unlinked"
-            else
-                echo "done!"
-            fi
+            echo "done!"
         else
             rmlink $2
         fi
