@@ -4,7 +4,7 @@ Dotfile manager made in Shell.
 ## Quickstart
 1. Installation:
 ```
-git clone https://github.com/dmun/dots.git && sudo cp dots/dots /usr/bin/
+git clone https://github.com/dmun/dots.git && sudo cp dots/dots /usr/local/bin/
 ```
 2. Make sure your dotfiles folder satisfies the folder structure in the Requirements section of this README.
 3. Set your dotfiles directory absolute path.
