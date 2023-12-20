@@ -1,10 +1,18 @@
 #!/bin/bash
 
-if [ ! -f $HOME/.dotsconfig ]; then
-    touch $HOME/.dotsconfig
+DOTS_DIR="${DOTS_DIR:-$HOME/.dotfiles}"
+
+if [ ! -d $DOTS_DIR ]; then
+    echo "directory does not exist: $DOTS_DIR"
+    exit 1
 fi
-dots_dir=$(cat $HOME/.dotsconfig)
-files=$(ls -a $dots_dir | grep -Ev '^\.$|^\.\.$|^.git*|^README.md$|^other$')
+
+files=$(ls -a $DOTS_DIR | grep -Ev '^\.$|^\.\.$|^.git*|^README.md$|^other$')
+
+NO_FORMAT="\033[0m"
+F_BOLD="\033[1m"
+C_LIME="\033[38;5;10m"
+C_RED="\033[38;5;9m"
 
 # shows usage
 usage () {
@@ -18,27 +26,35 @@ linked () {
 
 # shows status for dotfiles
 status () {
+    echo "Dotfiles in $DOTS_DIR$([ $DOTS_DIR == $HOME/.dotfiles ] && echo ' (default)')"
+
+    echo -e "\nFiles linked:"
     for file in $files; do
         if linked $file; then
-            echo -e "$(tput bold)\e[36m$file\e[0m@"
-        else
-            echo $file
+            echo -e "    ${C_LIME}$file${NO_FORMAT}"
+        fi
+    done
+
+    echo -e "\nFiles unlinked:"
+    for file in $files; do
+        if ! linked $file; then
+            echo -e "    ${C_RED}$file${NO_FORMAT}"
         fi
     done
 }
 
 # link a dotfile
 link () {
-    if [ -d $dots_dir/$1 ] && [[ ! $1 = .* ]]; then
-        ln -s $dots_dir/$1 $HOME/.config/ && echo "created link at $HOME/.config/$1"
+    if [ -d $DOTS_DIR/$1 ] && [[ ! $1 = .* ]]; then
+        ln -s $DOTS_DIR/$1 $HOME/.config/ && echo "created link at $HOME/.config/$1"
     elif [[ $1 = .* ]]; then
-        ln -s $dots_dir/$1 $HOME/ && echo "created link at $HOME/$1"
+        ln -s $DOTS_DIR/$1 $HOME/ && echo "created link at $HOME/$1"
     fi
 }
 
 # unlink a dotfile
 rmlink () {
-    if [ -d $dots_dir/$1 ] && [[ ! $1 = .* ]]; then
+    if [ -d $DOTS_DIR/$1 ] && [[ ! $1 = .* ]]; then
         unlink $HOME/.config/$1 && echo "unlinked $HOME/.config/$1"
     elif [[ $1 = .* ]]; then
         unlink $HOME/$1 && echo "unlinked $HOME/$1"
