@@ -26,7 +26,7 @@ linked () {
 
 # shows status for dotfiles
 status () {
-    echo "Dotfiles in $DOTS_DIR$([ $DOTS_DIR == $HOME/.dotfiles ] && echo ' (default)')"
+    echo "Using directory $DOTS_DIR $([ $DOTS_DIR == $HOME/.dotfiles ] && echo '(default)')"
 
     echo -e "\nFiles linked:"
     for file in $files; do
@@ -41,6 +41,8 @@ status () {
             echo -e "    ${C_RED}$file${NO_FORMAT}"
         fi
     done
+
+    echo
 }
 
 # link a dotfile
@@ -61,6 +63,23 @@ rmlink () {
     fi
 }
 
+set () {
+    if [ -z "$1" ]
+    then
+        echo "missing argument"
+        exit 1
+    fi
+
+    if [ -d $1 ]
+    then
+        echo $1 > $HOME/.dotsconfig
+        echo "done"
+    else
+        echo "dots set: '$1' is not a valid directory."
+        exit 1
+    fi
+}
+
 # contains all possible commands
 case $1 in
     link | l)
@@ -70,7 +89,7 @@ case $1 in
                     link $file
                 fi
             done
-            echo "done!"
+            echo "done"
         else
             link $2
         fi
@@ -83,25 +102,25 @@ case $1 in
                     rmlink $file
                 fi
             done
-            echo "done!"
+            echo "done"
         else
             rmlink $2
         fi
     ;;
 
     set)
-        if [ $2 ]; then
-            echo $2 > $HOME/.dotsconfig
-        else
-            echo "missing argument"
-        fi
+        set $2
     ;;
 
-    status | list | ls)
+    status)
         status
     ;;
 
-    *)
+    help | "")
         usage
+    ;;
+
+    *)
+        echo "dots: '$1' is not a dots command. See 'dots help'."
     ;;
 esac
