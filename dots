@@ -9,23 +9,23 @@ fi
 
 files=$(ls -a $DOTS_DIR | grep -Ev '^\.$|^\.\.$|^.git*|^README.md$|^other$')
 
-NO_FORMAT="\033[0m"
-F_BOLD="\033[1m"
-C_LIME="\033[38;5;10m"
-C_RED="\033[38;5;9m"
+readonly NO_FORMAT="\033[0m"
+readonly F_BOLD="\033[1m"
+readonly C_LIME="\033[38;5;10m"
+readonly C_RED="\033[38;5;9m"
 
 # shows usage
-usage () {
+function usage {
     echo "usage: dots [set <path>] [link] [status]"
 }
 
 # check if file is linked
-linked () {
-    [ -h $HOME/.config/$1 ] || [ -h $HOME/$1 ]
+function linked {
+    [ -h $XDG_CONFIG_HOME/$1 ] || [ -h $HOME/$1 ]
 }
 
 # shows status for dotfiles
-status () {
+function status {
     echo "Using directory $DOTS_DIR $([ $DOTS_DIR == $HOME/.dotfiles ] && echo '(default)')"
 
     echo -e "\nFiles linked:"
@@ -45,33 +45,33 @@ status () {
     echo
 }
 
-# link a dotfile
-link () {
-    if [ -d $DOTS_DIR/$1 ] && [[ ! $1 = .* ]]; then
-        ln -s $DOTS_DIR/$1 $HOME/.config/ && echo "created link at $HOME/.config/$1"
+function resolve_target_dir {
+	 if [ -d $DOTS_DIR/$1 ] && [[ ! $1 = .* ]]; then
+		  echo $XDG_CONFIG_HOME
     elif [[ $1 = .* ]]; then
-        ln -s $DOTS_DIR/$1 $HOME/ && echo "created link at $HOME/$1"
+		  echo $HOME
     fi
+}
+
+# link a dotfile
+function link {
+	 target_dir=$(resolve_target_dir $1)
+	 ln -s $DOTS_DIR/$1 $target_dir/ && echo "created link at $target_dir/$1"
 }
 
 # unlink a dotfile
-rmlink () {
-    if [ -d $DOTS_DIR/$1 ] && [[ ! $1 = .* ]]; then
-        unlink $HOME/.config/$1 && echo "unlinked $HOME/.config/$1"
-    elif [[ $1 = .* ]]; then
-        unlink $HOME/$1 && echo "unlinked $HOME/$1"
-    fi
+function rmlink {
+	 target_dir=$(resolve_target_dir)
+	 unlink $target_dir/$1 && echo "removed link at $target_dir/$1"
 }
 
-set () {
-    if [ -z "$1" ]
-    then
+function set {
+    if [ -z "$1" ]; then
         echo "missing argument"
         exit 1
     fi
 
-    if [ -d $1 ]
-    then
+    if [ -d $1 ]; then
         echo $1 > $HOME/.dotsconfig
         echo "done"
     else
@@ -108,19 +108,8 @@ case $1 in
         fi
     ;;
 
-    set)
-        set $2
-    ;;
-
-    status)
-        status
-    ;;
-
-    help | "")
-        usage
-    ;;
-
-    *)
-        echo "dots: '$1' is not a dots command. See 'dots help'."
-    ;;
+    set) set $2 ;;
+    status) status ;;
+    help | "") usage ;;
+	 *) echo "dots: '$1' is not a dots command. See 'dots help'." ;;
 esac
