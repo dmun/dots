@@ -86,12 +86,12 @@ case $1 in
         if [ ! $2 ]; then
             for file in $files; do
                 if ! linked $file; then
-                    link $file
+                    link "$file"
                 fi
             done
             echo "done"
         else
-            link $2
+            link "$2"
         fi
     ;;
 
@@ -99,16 +99,16 @@ case $1 in
         if [ ! $2 ]; then
             for file in $files; do
                 if linked $file; then
-                    rmlink $file
+                    rmlink "$file"
                 fi
             done
             echo "done"
         else
-            rmlink $2
+            rmlink "$2"
         fi
     ;;
 
-    set) set $2 ;;
+    set) set "$2" ;;
     status) status ;;
     help | "") usage ;;
 	 *) echo "dots: '$1' is not a dots command. See 'dots help'." ;;
