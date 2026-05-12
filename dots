@@ -47,7 +47,7 @@ function status {
 
 function resolve_target_dir {
 	 if [ -d $DOTS_DIR/$1 ] && [[ ! $1 = .* ]]; then
-		  echo $XDG_CONFIG_HOME
+		  echo "${XDG_CONFIG_HOME:-$HOME/.config}"
     elif [[ $1 = .* ]]; then
 		  echo $HOME
     fi
